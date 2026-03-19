@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlmodel
+streamlit
+pandas
+openpyxl
+requests
+XlsxWriter
+streamlit-aggrid
