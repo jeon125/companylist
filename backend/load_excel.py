@@ -20,7 +20,9 @@ with Session(engine) as session:
             address=row["주소"],
             tel=row["전화번호"],
             homepage=row["홈페이지"],
-            category_id=category_map[row["분류"]]
+            category_id=category_map[row["분류"]],
+            contact_person=row.get("담당자"),
+            email=row.get("이메일"),
         )
         session.add(company)
 
