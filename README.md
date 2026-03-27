@@ -143,7 +143,7 @@ streamlit run app.py
 
 ---
 
-## 📸 화면 예시
+## 📸 화면
 
 ### 메인 화면
 ![메인 화면](./assets/main.png)
