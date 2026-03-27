@@ -20,6 +20,8 @@ class Company(SQLModel, table=True):
     name: str = Field(index=True)
     category_id: int = Field(foreign_key="category.id")
 
+    region: Optional[str] = Field(default=None, index=True)
+
     address: Optional[str] = None
     tel: Optional[str] = None
     homepage: Optional[str] = None

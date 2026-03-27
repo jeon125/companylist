@@ -14,6 +14,7 @@ app = FastAPI()
 class CompanyCreate(BaseModel):
     name: str
     category_id: int
+    region: str
     address: Optional[str] = None
     tel: Optional[str] = None
     homepage: Optional[str] = None
@@ -24,6 +25,7 @@ class CompanyCreate(BaseModel):
 class CompanyUpdate(BaseModel):
     name: str
     category_id: int
+    region: str
     address: Optional[str] = None
     tel: Optional[str] = None
     homepage: Optional[str] = None
@@ -43,6 +45,7 @@ def get_companies():
             {
                 "id": c.id,
                 "name": c.name,
+                "region": c.region,
                 "address": c.address,
                 "tel": c.tel,
                 "homepage": c.homepage,
@@ -73,6 +76,7 @@ def get_companies_by_category(category_name: str):
             {
                 "id": c.id,
                 "name": c.name,
+                "region": c.region,
                 "address": c.address,
                 "tel": c.tel,
                 "homepage": c.homepage,
@@ -92,6 +96,9 @@ def create_company(company: CompanyCreate):
 
     if not company.name.strip():
         raise HTTPException(400, "업체명은 필수입니다.")
+    
+    if not company.region.strip():
+        raise HTTPException(400, "지역은 필수입니다.")
 
     if not (company.address and company.address.strip()):
         raise HTTPException(400, "주소는 필수입니다.")
@@ -118,6 +125,7 @@ def create_company(company: CompanyCreate):
 
         new_company = Company(
             name=company.name.strip(),
+            region=company.region.strip(),
             address=company.address.strip(),
             tel=company.tel or "",
             homepage=company.homepage or "",
@@ -150,6 +158,9 @@ def update_company(company_id: int, company: CompanyUpdate):
 
     if not company.name.strip():
         raise HTTPException(400, "업체명은 필수입니다.")
+    
+    if not company.region.strip():
+        raise HTTPException(400, "지역은 필수입니다.")
 
     if not (company.address and company.address.strip()):
         raise HTTPException(400, "주소는 필수입니다.")
@@ -172,6 +183,7 @@ def update_company(company_id: int, company: CompanyUpdate):
                 raise HTTPException(400, "이미 사용 중인 이메일입니다.")
 
         db_company.name = company.name.strip()
+        db_company.region = company.region.strip()
         db_company.address = company.address.strip()
         db_company.tel = company.tel or ""
         db_company.homepage = company.homepage or ""

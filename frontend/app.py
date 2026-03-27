@@ -61,7 +61,7 @@ for col in ["contact_person", "email"]:
     if col not in df.columns:
         df[col] = ""
 
-columns_order = ["id", "category", "name", "address", "tel", "homepage", "contact_person", "email"]
+columns_order = ["id", "category", "name", "region", "address", "tel", "homepage", "contact_person", "email"]
 df = df[columns_order]
 
 # -----------------------------
@@ -71,7 +71,7 @@ def to_excel(df):
     output = BytesIO()
     df_excel = df.drop(columns=["id"]).copy()  # 여기서만 id 제거
     df_excel["homepage"] = df_excel["homepage"].apply(lambda x: f"'{x}" if x else "")
-    df_excel.columns = ["구분", "업체명", "주소", "전화번호", "홈페이지", "담당자", "이메일"]
+    df_excel.columns = ["구분", "업체명", "지역", "주소", "전화번호", "홈페이지", "담당자", "이메일"]
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df_excel.to_excel(writer, index=False)
     return output.getvalue()
@@ -98,6 +98,7 @@ with st.container():
 def add_dialog():
     name = st.text_input("업체명")
     category_input = st.selectbox("카테고리", ["기업", "학교", "관공서"])
+    region = st.text_input("지역")
     contact_person = st.text_input("담당자")
     email = st.text_input("이메일")
     address = st.text_input("주소")
@@ -118,6 +119,7 @@ def add_dialog():
         payload = {
             "name": name.strip(),
             "category_id": category_map[category_input],
+            "region": region.strip(),
             "contact_person": contact_person or None,
             "email": email.strip() if email.strip() else None,
             "address": address.strip(),
@@ -153,6 +155,7 @@ def edit_dialog(selected_row):
         ["기업", "학교", "관공서"],
         index=["기업","학교","관공서"].index(selected_row["category"])
     )
+    region = st.text_input("지역", value=selected_row.get("region", ""))
     contact_person = st.text_input("담당자", value=selected_row.get("contact_person", ""))
     email = st.text_input("이메일", value=selected_row.get("email", ""))
     address = st.text_input("주소", value=selected_row.get("address", ""))
@@ -170,14 +173,15 @@ def edit_dialog(selected_row):
     # 수정 처리
     # -----------------------------
     if submit:
-        if not name.strip() or not address.strip():
-            st.error("업체명과 주소는 필수입니다.")
+        if not name.strip() or not address.strip() or not region.strip():
+            st.error("업체명, 지역, 주소는 필수입니다.")
             return
 
         category_map = {"관공서": 1, "기업": 2, "학교": 3}
         payload = {
             "name": name.strip(),
             "category_id": category_map[category_input],
+            "region": region.strip(),
             "contact_person": contact_person or None,
             "email": email.strip() if email and email.strip() else None,
             "address": address.strip(),
@@ -223,6 +227,7 @@ def edit_dialog(selected_row):
 columns_map = {
     "category": "구분",
     "name": "업체명",
+    "region": "지역",
     "address": "주소",
     "tel": "전화번호",
     "homepage": "홈페이지",
@@ -235,8 +240,13 @@ df_grid = df.copy()
 gb = GridOptionsBuilder.from_dataframe(df_grid)
 for col, display_name in columns_map.items():
     gb.configure_column(col, header_name=display_name)
+gb.configure_pagination(
+    paginationAutoPageSize=False,
+    paginationPageSize=20
+)
 gb.configure_selection("single", use_checkbox=False)
 gridOptions = gb.build()
+gridOptions["domLayout"] = "autoHeight"
 gridOptions["onGridSizeChanged"] = JsCode(""" function(params) { params.api.sizeColumnsToFit(); } """)
 
 grid = AgGrid(

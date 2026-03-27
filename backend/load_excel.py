@@ -17,6 +17,7 @@ with Session(engine) as session:
     for _, row in df.iterrows():
         company = Company(
             name=row["업체명"],
+            region=row["지역"],
             address=row["주소"],
             tel=row["전화번호"],
             homepage=row["홈페이지"],
